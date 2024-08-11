@@ -24,3 +24,25 @@ can_construct :: proc(t: ^testing.T) {
 
 	testing.expect(t, atlas != nil)
 }
+
+@(test)
+progress_category :: proc(t: ^testing.T) {
+	category : xa.xatlasProgressCategory
+	str: cstring
+
+	category = xa.xatlasProgressCategory.XATLAS_PROGRESS_CATEGORY_ADDMESH
+	str = xa.xatlasProgressCategoryString(category)
+	testing.expect(t, str == "Adding mesh(es)", string(str))
+
+	category = xa.xatlasProgressCategory.XATLAS_PROGRESS_CATEGORY_COMPUTECHARTS
+	str = xa.xatlasProgressCategoryString(category)
+	testing.expect(t, str == "Computing charts", string(str))
+
+	category = xa.xatlasProgressCategory.XATLAS_PROGRESS_CATEGORY_PACKCHARTS
+	str = xa.xatlasProgressCategoryString(category)
+	testing.expect(t, str == "Packing charts", string(str))
+
+	category = xa.xatlasProgressCategory.XATLAS_PROGRESS_CATEGORY_BUILDOUTPUTMESHES
+	str = xa.xatlasProgressCategoryString(category)
+	testing.expect(t, str == "Building output meshes", string(str))
+}

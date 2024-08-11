@@ -1,27 +1,28 @@
 package xatlas
 
-foreign import xatlas "xatlas.lib"
-
-USE_LINALG :: #config(FMOD_USE_LINALG, true)
-
 import _c "core:c"
+//import "base:intrinsics"
 //import "core:math/linalg"
+//USE_LINALG :: #config(XATLAS_USE_LINALG, true)
+//when !intrinsics.is_package_imported("math/linalg") {}
+
+foreign import xatlas "xatlas.lib"
 
 uint32_t :: _c.uint32_t
 int32_t :: _c.int32_t
 float :: _c.float
-_Bool :: bool
+_Bool :: _c.bool
 
 xatlasImageChartIndexMask :: 0x1FFFFFFF
 xatlasImageHasChartIndexBit :: 0x80000000
 xatlasImageIsBilinearBit :: 0x40000000
 xatlasImageIsPaddingBit :: 0x20000000
 
-xatlasParameterizeFunc :: #type proc(positions : ^_c.float, texcoords : ^_c.float, vertexCount : u32, indices : ^u32, indexCount : u32)
-xatlasProgressFunc :: #type proc(category : xatlasProgressCategory, progress : _c.int, userData : rawptr) -> _Bool
-xatlasReallocFunc :: #type proc(unamed0 : rawptr, unamed1 : _c.size_t) -> rawptr
-xatlasFreeFunc :: #type proc(unamed0 : rawptr)
-xatlasPrintFunc :: #type proc(unamed0 : cstring) -> _c.int
+xatlasParameterizeFunc :: #type proc "c" (positions : ^_c.float, texcoords : ^_c.float, vertexCount : u32, indices : ^u32, indexCount : u32)
+xatlasProgressFunc :: #type proc "c" (category : xatlasProgressCategory, progress : _c.int, userData : rawptr) -> _Bool
+xatlasReallocFunc :: #type proc "c" (pointer : rawptr, size : _c.size_t) -> rawptr
+xatlasFreeFunc :: #type proc "c" (pointer : rawptr)
+xatlasPrintFunc :: #type proc "c" (format : cstring, args: ..any) -> _c.int
 
 xatlasChartType :: enum i32 {
     XATLAS_CHART_TYPE_PLANAR,
