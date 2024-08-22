@@ -22,7 +22,7 @@ xatlasParameterizeFunc :: #type proc "c" (positions : ^_c.float, texcoords : ^_c
 xatlasProgressFunc :: #type proc "c" (category : xatlasProgressCategory, progress : _c.int, userData : rawptr) -> _Bool
 xatlasReallocFunc :: #type proc "c" (pointer : rawptr, size : _c.size_t) -> rawptr
 xatlasFreeFunc :: #type proc "c" (pointer : rawptr)
-xatlasPrintFunc :: #type proc "c" (format : cstring, args: ..any) -> _c.int
+xatlasPrintFunc :: #type proc "c" (format : cstring, #c_vararg args: ..any) -> _c.int
 
 xatlasChartType :: enum i32 {
     XATLAS_CHART_TYPE_PLANAR,
