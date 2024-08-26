@@ -6,11 +6,10 @@ xatlas is a small C++11 library with no external dependencies that generates uni
 
 It is an independent fork of [thekla_atlas](https://github.com/Thekla/thekla_atlas), used by [The Witness](https://en.wikipedia.org/wiki/The_Witness_(2016_video_game)).
 
-To use the lib clone it in the shared folder in the odin root.
+One way to use the lib is to add it as a git submodule:
 
 ```bat
-cd %ODIN_ROOT%
-git clone ssh://git@gitea.ontogenesis.com:2222/odin/odin-xatlas.git shared/xatlas
+git submodule add git@github.com:Hyrtwol/odin-xatlas.git xatlas
 ```
 
 ## Screenshots
