@@ -1,10 +1,6 @@
 package xatlas
 
 import _c "core:c"
-//import "base:intrinsics"
-//import "core:math/linalg"
-//USE_LINALG :: #config(XATLAS_USE_LINALG, true)
-//when !intrinsics.is_package_imported("math/linalg") {}
 
 foreign import xatlas "xatlas.lib"
 
@@ -13,18 +9,18 @@ int32_t :: _c.int32_t
 float :: _c.float
 _Bool :: _c.bool
 
-xatlasImageChartIndexMask :: 0x1FFFFFFF
-xatlasImageHasChartIndexBit :: 0x80000000
-xatlasImageIsBilinearBit :: 0x40000000
-xatlasImageIsPaddingBit :: 0x20000000
+ImageChartIndexMask :: 0x1FFFFFFF
+ImageHasChartIndexBit :: 0x80000000
+ImageIsBilinearBit :: 0x40000000
+ImageIsPaddingBit :: 0x20000000
 
-xatlasParameterizeFunc :: #type proc "c" (positions : ^_c.float, texcoords : ^_c.float, vertexCount : u32, indices : ^u32, indexCount : u32)
-xatlasProgressFunc :: #type proc "c" (category : xatlasProgressCategory, progress : _c.int, userData : rawptr) -> _Bool
-xatlasReallocFunc :: #type proc "c" (pointer : rawptr, size : _c.size_t) -> rawptr
-xatlasFreeFunc :: #type proc "c" (pointer : rawptr)
-xatlasPrintFunc :: #type proc "c" (format : cstring, #c_vararg args: ..any) -> _c.int
+ParameterizeFunc :: #type proc "c" (positions : ^_c.float, texcoords : ^_c.float, vertexCount : u32, indices : ^u32, indexCount : u32)
+ProgressFunc :: #type proc "c" (category : ProgressCategory, progress : _c.int, userData : rawptr) -> _Bool
+ReallocFunc :: #type proc "c" (pointer : rawptr, size : _c.size_t) -> rawptr
+FreeFunc :: #type proc "c" (pointer : rawptr)
+PrintFunc :: #type proc "c" (format : cstring, #c_vararg args: ..any) -> _c.int
 
-xatlasChartType :: enum i32 {
+ChartType :: enum i32 {
     XATLAS_CHART_TYPE_PLANAR,
     XATLAS_CHART_TYPE_ORTHO,
     XATLAS_CHART_TYPE_LSCM,
@@ -32,12 +28,12 @@ xatlasChartType :: enum i32 {
     XATLAS_CHART_TYPE_INVALID,
 }
 
-xatlasIndexFormat :: enum i32 {
+IndexFormat :: enum i32 {
     XATLAS_INDEX_FORMAT_UINT16,
     XATLAS_INDEX_FORMAT_UINT32,
 }
 
-xatlasAddMeshError :: enum i32 {
+AddMeshError :: enum i32 {
     XATLAS_ADD_MESH_ERROR_SUCCESS,
     XATLAS_ADD_MESH_ERROR_ERROR,
     XATLAS_ADD_MESH_ERROR_INDEXOUTOFRANGE,
@@ -45,40 +41,40 @@ xatlasAddMeshError :: enum i32 {
     XATLAS_ADD_MESH_ERROR_INVALIDINDEXCOUNT,
 }
 
-xatlasProgressCategory :: enum i32 {
+ProgressCategory :: enum i32 {
     XATLAS_PROGRESS_CATEGORY_ADDMESH,
     XATLAS_PROGRESS_CATEGORY_COMPUTECHARTS,
     XATLAS_PROGRESS_CATEGORY_PACKCHARTS,
     XATLAS_PROGRESS_CATEGORY_BUILDOUTPUTMESHES,
 }
 
-xatlasChart :: struct {
+Chart :: struct {
     faceArray : ^u32,
     atlasIndex : u32,
     faceCount : u32,
-    type : xatlasChartType,
+    type : ChartType,
     material : u32,
 }
 
-xatlasVertex :: struct {
+Vertex :: struct {
     atlasIndex : i32,
     chartIndex : i32,
     uv : [2]_c.float,
     xref : u32,
 }
 
-xatlasMesh :: struct {
-    chartArray : ^xatlasChart,
+Mesh :: struct {
+    chartArray : ^Chart,
     indexArray : ^u32,
-    vertexArray : ^xatlasVertex,
+    vertexArray : ^Vertex,
     chartCount : u32,
     indexCount : u32,
     vertexCount : u32,
 }
 
-xatlasAtlas :: struct {
+Atlas :: struct {
     image : ^u32,
-    meshes : ^xatlasMesh,
+    meshes : ^Mesh,
     utilization : ^_c.float,
     width : u32,
     height : u32,
@@ -88,7 +84,7 @@ xatlasAtlas :: struct {
     texelsPerUnit : _c.float,
 }
 
-xatlasMeshDecl :: struct {
+MeshDecl :: struct {
     vertexPositionData : rawptr,
     vertexNormalData : rawptr,
     vertexUvData : rawptr,
@@ -103,11 +99,11 @@ xatlasMeshDecl :: struct {
     indexCount : u32,
     indexOffset : i32,
     faceCount : u32,
-    indexFormat : xatlasIndexFormat,
+    indexFormat : IndexFormat,
     epsilon : _c.float,
 }
 
-xatlasUvMeshDecl :: struct {
+UvMeshDecl :: struct {
     vertexUvData : rawptr,
     indexData : rawptr,
     faceMaterialData : ^u32,
@@ -115,11 +111,11 @@ xatlasUvMeshDecl :: struct {
     vertexStride : u32,
     indexCount : u32,
     indexOffset : i32,
-    indexFormat : xatlasIndexFormat,
+    indexFormat : IndexFormat,
 }
 
-xatlasChartOptions :: struct {
-    paramFunc : xatlasParameterizeFunc,
+ChartOptions :: struct {
+    paramFunc : ParameterizeFunc,
     maxChartArea : _c.float,
     maxBoundaryLength : _c.float,
     normalDeviationWeight : _c.float,
@@ -133,7 +129,7 @@ xatlasChartOptions :: struct {
     fixWinding : _Bool,
 }
 
-xatlasPackOptions :: struct {
+PackOptions :: struct {
     maxChartSize : u32,
     padding : u32,
     texelsPerUnit : _c.float,
@@ -146,58 +142,23 @@ xatlasPackOptions :: struct {
     rotateCharts : _Bool,
 }
 
-@(default_calling_convention="c")
+@(default_calling_convention="c", link_prefix = "xatlas")
 foreign xatlas {
-
-    @(link_name="xatlasCreate")
-    xatlasCreate :: proc() -> ^xatlasAtlas ---
-
-    @(link_name="xatlasDestroy")
-    xatlasDestroy :: proc(atlas : ^xatlasAtlas) ---
-
-    @(link_name="xatlasAddMesh")
-    xatlasAddMesh :: proc(atlas : ^xatlasAtlas, meshDecl : ^xatlasMeshDecl, meshCountHint : u32) -> xatlasAddMeshError ---
-
-    @(link_name="xatlasAddMeshJoin")
-    xatlasAddMeshJoin :: proc(atlas : ^xatlasAtlas) ---
-
-    @(link_name="xatlasAddUvMesh")
-    xatlasAddUvMesh :: proc(atlas : ^xatlasAtlas, decl : ^xatlasUvMeshDecl) -> xatlasAddMeshError ---
-
-    @(link_name="xatlasComputeCharts")
-    xatlasComputeCharts :: proc(atlas : ^xatlasAtlas, chartOptions : ^xatlasChartOptions) ---
-
-    @(link_name="xatlasPackCharts")
-    xatlasPackCharts :: proc(atlas : ^xatlasAtlas, packOptions : ^xatlasPackOptions) ---
-
-    @(link_name="xatlasGenerate")
-    xatlasGenerate :: proc(atlas : ^xatlasAtlas, chartOptions : ^xatlasChartOptions, packOptions : ^xatlasPackOptions) ---
-
-    @(link_name="xatlasSetProgressCallback")
-    xatlasSetProgressCallback :: proc(atlas : ^xatlasAtlas, progressFunc : xatlasProgressFunc, progressUserData : rawptr) ---
-
-    @(link_name="xatlasSetAlloc")
-    xatlasSetAlloc :: proc(reallocFunc : xatlasReallocFunc, freeFunc : xatlasFreeFunc) ---
-
-    @(link_name="xatlasSetPrint")
-    xatlasSetPrint :: proc(print : xatlasPrintFunc, verbose : _Bool) ---
-
-    @(link_name="xatlasAddMeshErrorString")
-    xatlasAddMeshErrorString :: proc(error : xatlasAddMeshError) -> cstring ---
-
-    @(link_name="xatlasProgressCategoryString")
-    xatlasProgressCategoryString :: proc(category : xatlasProgressCategory) -> cstring ---
-
-    @(link_name="xatlasMeshDeclInit")
-    xatlasMeshDeclInit :: proc(meshDecl : ^xatlasMeshDecl) ---
-
-    @(link_name="xatlasUvMeshDeclInit")
-    xatlasUvMeshDeclInit :: proc(uvMeshDecl : ^xatlasUvMeshDecl) ---
-
-    @(link_name="xatlasChartOptionsInit")
-    xatlasChartOptionsInit :: proc(chartOptions : ^xatlasChartOptions) ---
-
-    @(link_name="xatlasPackOptionsInit")
-    xatlasPackOptionsInit :: proc(packOptions : ^xatlasPackOptions) ---
-
+    Create :: proc() -> ^Atlas ---
+    Destroy :: proc(atlas : ^Atlas) ---
+    AddMesh :: proc(atlas : ^Atlas, meshDecl : ^MeshDecl, meshCountHint : u32) -> AddMeshError ---
+    AddMeshJoin :: proc(atlas : ^Atlas) ---
+    AddUvMesh :: proc(atlas : ^Atlas, decl : ^UvMeshDecl) -> AddMeshError ---
+    ComputeCharts :: proc(atlas : ^Atlas, chartOptions : ^ChartOptions) ---
+    PackCharts :: proc(atlas : ^Atlas, packOptions : ^PackOptions) ---
+    Generate :: proc(atlas : ^Atlas, chartOptions : ^ChartOptions, packOptions : ^PackOptions) ---
+    SetProgressCallback :: proc(atlas : ^Atlas, progressFunc : ProgressFunc, progressUserData : rawptr) ---
+    SetAlloc :: proc(reallocFunc : ReallocFunc, freeFunc : FreeFunc) ---
+    SetPrint :: proc(print : PrintFunc, verbose : _Bool) ---
+    AddMeshErrorString :: proc(error : AddMeshError) -> cstring ---
+    ProgressCategoryString :: proc(category : ProgressCategory) -> cstring ---
+    MeshDeclInit :: proc(meshDecl : ^MeshDecl) ---
+    UvMeshDeclInit :: proc(uvMeshDecl : ^UvMeshDecl) ---
+    ChartOptionsInit :: proc(chartOptions : ^ChartOptions) ---
+    PackOptionsInit :: proc(packOptions : ^PackOptions) ---
 }
