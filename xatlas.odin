@@ -6,17 +6,19 @@ foreign import xatlas "xatlas.lib"
 
 uint32_t :: _c.uint32_t
 int32_t :: _c.int32_t
+size_t :: _c.size_t
 float :: _c.float
-_Bool :: _c.bool
+float2 :: [2]float
+bool :: _c.bool
 
 ImageChartIndexMask :: 0x1FFFFFFF
 ImageHasChartIndexBit :: 0x80000000
 ImageIsBilinearBit :: 0x40000000
 ImageIsPaddingBit :: 0x20000000
 
-ParameterizeFunc :: #type proc "c" (positions : ^_c.float, texcoords : ^_c.float, vertexCount : u32, indices : ^u32, indexCount : u32)
-ProgressFunc :: #type proc "c" (category : ProgressCategory, progress : _c.int, userData : rawptr) -> _Bool
-ReallocFunc :: #type proc "c" (pointer : rawptr, size : _c.size_t) -> rawptr
+ParameterizeFunc :: #type proc "c" (positions : ^float, texcoords : ^float, vertexCount : u32, indices : ^u32, indexCount : u32)
+ProgressFunc :: #type proc "c" (category : ProgressCategory, progress : _c.int, userData : rawptr) -> bool
+ReallocFunc :: #type proc "c" (pointer : rawptr, size : size_t) -> rawptr
 FreeFunc :: #type proc "c" (pointer : rawptr)
 PrintFunc :: #type proc "c" (format : cstring, #c_vararg args: ..any) -> _c.int
 
@@ -59,7 +61,7 @@ Chart :: struct {
 Vertex :: struct {
     atlasIndex : i32,
     chartIndex : i32,
-    uv : [2]_c.float,
+    uv : float2,
     xref : u32,
 }
 
@@ -75,13 +77,13 @@ Mesh :: struct {
 Atlas :: struct {
     image : ^u32,
     meshes : ^Mesh,
-    utilization : ^_c.float,
+    utilization : ^float,
     width : u32,
     height : u32,
     atlasCount : u32,
     chartCount : u32,
     meshCount : u32,
-    texelsPerUnit : _c.float,
+    texelsPerUnit : float,
 }
 
 MeshDecl :: struct {
@@ -89,7 +91,7 @@ MeshDecl :: struct {
     vertexNormalData : rawptr,
     vertexUvData : rawptr,
     indexData : rawptr,
-    faceIgnoreData : ^_Bool,
+    faceIgnoreData : ^bool,
     faceMaterialData : ^u32,
     faceVertexCount : ^u8,
     vertexCount : u32,
@@ -100,7 +102,7 @@ MeshDecl :: struct {
     indexOffset : i32,
     faceCount : u32,
     indexFormat : IndexFormat,
-    epsilon : _c.float,
+    epsilon : float,
 }
 
 UvMeshDecl :: struct {
@@ -116,30 +118,30 @@ UvMeshDecl :: struct {
 
 ChartOptions :: struct {
     paramFunc : ParameterizeFunc,
-    maxChartArea : _c.float,
-    maxBoundaryLength : _c.float,
-    normalDeviationWeight : _c.float,
-    roundnessWeight : _c.float,
-    straightnessWeight : _c.float,
-    normalSeamWeight : _c.float,
-    textureSeamWeight : _c.float,
-    maxCost : _c.float,
+    maxChartArea : float,
+    maxBoundaryLength : float,
+    normalDeviationWeight : float,
+    roundnessWeight : float,
+    straightnessWeight : float,
+    normalSeamWeight : float,
+    textureSeamWeight : float,
+    maxCost : float,
     maxIterations : u32,
-    useInputMeshUvs : _Bool,
-    fixWinding : _Bool,
+    useInputMeshUvs : bool,
+    fixWinding : bool,
 }
 
 PackOptions :: struct {
     maxChartSize : u32,
     padding : u32,
-    texelsPerUnit : _c.float,
+    texelsPerUnit : float,
     resolution : u32,
-    bilinear : _Bool,
-    blockAlign : _Bool,
-    bruteForce : _Bool,
-    createImage : _Bool,
-    rotateChartsToAxis : _Bool,
-    rotateCharts : _Bool,
+    bilinear : bool,
+    blockAlign : bool,
+    bruteForce : bool,
+    createImage : bool,
+    rotateChartsToAxis : bool,
+    rotateCharts : bool,
 }
 
 @(default_calling_convention="c", link_prefix = "xatlas")
@@ -154,7 +156,7 @@ foreign xatlas {
     Generate :: proc(atlas : ^Atlas, chartOptions : ^ChartOptions, packOptions : ^PackOptions) ---
     SetProgressCallback :: proc(atlas : ^Atlas, progressFunc : ProgressFunc, progressUserData : rawptr) ---
     SetAlloc :: proc(reallocFunc : ReallocFunc, freeFunc : FreeFunc) ---
-    SetPrint :: proc(print : PrintFunc, verbose : _Bool) ---
+    SetPrint :: proc(print : PrintFunc, verbose : bool) ---
     AddMeshErrorString :: proc(error : AddMeshError) -> cstring ---
     ProgressCategoryString :: proc(category : ProgressCategory) -> cstring ---
     MeshDeclInit :: proc(meshDecl : ^MeshDecl) ---
